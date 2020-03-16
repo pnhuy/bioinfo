@@ -1,0 +1,249 @@
+---
+title: "Review on R Programming"
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+
+# Basic R
+## Assignment and Evaluation
+
+In `R`, we use `<-` symbol for assigning new variable.
+
+```{r}
+# Numerical variable
+age <- 25
+
+# String variable
+name <- "John Doe"
+```
+
+R could be used as calculator:
+
+### Arithmetic
+```{r}
+2 + 3
+2 - 3
+2 * 3
+2 / 3
+3 %% 2
+2 ^ 3 
+```
+
+Exercise: calculate the expression and assign it to variable `result`: 
+$$\sqrt[3]{\frac{435.4 \times 3.56}{(34 + 3)^2}}$$
+
+### Advanced mathematical operators
+```{r}
+log(10) # natural logarit
+log10(10) # logarit base ten
+abs(-4) # absolute
+sqrt(25) # square root
+sum( 2 + 5) # summation
+sin(pi)
+cos(pi)
+tan(pi)
+```
+
+### Comparison and logical operators
+Comparative operators:
+```{r}
+a = 1
+b = 2
+a > b # greater than
+a <= b # greater than or equal
+a == b # equal
+a != b  # not equal
+```
+
+Logical operators:
+```{r}
+a = TRUE
+b = FALSE
+class(a)
+class(b)
+a & b # a AND b
+a | b # a OR b
+!a # NOT a
+```
+
+## R Objects
+
+R has 5 basic classes of objects:
+
+* character (similar to string in other language)
+* numeric (real numbers)
+* integer
+* complex (number)
+* logical (or boolean)
+
+```{r}
+character_var <- "John"
+numeric_var <- 3.14
+integer_var <- 100L
+complex_var <- 1 + 2i
+logical_var <- TRUE
+```
+
+Vector is another popular type of R object. A vector can only contain objects of the same class.
+
+```{r}
+# Empty vector
+a <- vector()
+numeric_vector <- c(1, 2, 3)
+character_vector <- c("Alice", "Betty", "Catheryn")
+```
+
+## Numbers in R
+### Real number
+```{r}
+# Number
+a <- 1
+print(a)
+print(class(a))
+```
+
+### Integer number
+```{r}
+i <- 100L
+print(i)
+print(class(i))
+```
+
+### Infinity
+```{r}
+q <- 1/0
+print(q)
+print(class(q))
+```
+
+### NaN - Not a number
+```{r}
+n <- 0 / 0
+print(n)
+print(class(n))
+```
+
+Also:
+```{r}
+m <- NaN
+print(m)
+print(class(m))
+```
+
+## Vectors
+The `c()` function can be used to create a vectors.
+```{r}
+x <- c(0.5, 0.6) ## numeric
+x <- c(TRUE, FALSE) ## logical
+x <- c(T, F) ## logical
+x <- c("a", "b", "c") ## character
+x <- 9:29 ## integer
+x <- c(1+0i, 2+4i) ## complex
+```
+
+You can also use the vector() function to initialize vectors.
+```{r}
+x <- vector("numeric", length = 10)
+print(x)
+```
+
+### Mixing objects in R
+
+Because the vector in R only accept one class for every members, the vectors with different data types will be implicitly coerced.
+```{r}
+a <- c(1.7, "a") ## character
+print(a)
+b <- c(TRUE, 2) ## numeric
+print(b)
+c <- c("a", TRUE) ## character
+print(c)
+```
+
+### Explicit Coercion
+
+We can do coercion by ourself.
+
+```{r}
+x <- 0:6
+class(x)
+as.numeric(x)
+as.logical(x)
+as.character(x)
+```
+
+However, the vectors sometimes can't do coercion. In this case, the NAs will be return.
+
+```{r}
+x <- c("a", "b", "c")
+as.numeric(x)
+as.logical(x)
+as.complex(x)
+```
+
+## Matrices
+
+### Create a new matrix
+
+The matrix can be defined in R with `matrix` keyword.
+
+```{r}
+# Define an empty matrix
+n <- matrix(nrow = 2, ncol = 3)
+n
+
+# Define a matrix from a range
+m <- matrix(1:6, nrow = 2, ncol = 3)
+m
+# Display the dimension of m
+dim(m)
+
+# Display the attributes of m
+attributes(m)
+```
+
+
+### Create matrix from vector
+
+```{r}
+m <- 1:10
+m
+dim(m) <- c(2, 5)
+m
+```
+
+### Create matrix by binding
+
+```{r}
+x <- 1:3
+y <- 10:12
+```
+
+#### Row binding
+
+```{r}
+rbind(x, y)
+```
+
+#### Column binding
+
+```{r}
+cbind(x, y)
+```
+
+## Reading & Writing Data in R
+
+There are some principal function reading data in R:
+
+* `read.table` and `read.csv` for reading tabular data (file `csv`, `txt`)
+* `readLines` for reading lines of a text file
+
+For writing:
+
+* `write.table` for writing tabular data to text file (`csv`)
+* `writeLines` for writing character data line-by-line to a file
+
+
+

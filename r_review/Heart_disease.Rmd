@@ -1,0 +1,172 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+  html_document:
+    df_print: paged
+---
+
+Install and load helpful library for analysis.
+```{r}
+# Install required library, need not to re-install if you already have
+# install.packages("dplyr")
+# install.packages("Hmisc")
+# install.packages("ggplot2")
+
+# Load the require library
+# library(dplyr)
+# library(Hmisc)
+# library(ggplot2)
+```
+
+
+
+# Data Loading & Exploratory data analysis
+
+## Load the data in csv file and store to variable name `data`.
+```{r Data_Loading}
+path <- "https://raw.githubusercontent.com/pnhuy/datasets/master/heart_uci/heart.csv"
+data <- read.csv(path)
+```
+
+## Show some rows of data to get some insight of data.
+```{r}
+head(data)
+```
+
+## Remove the first columns because it is not useful for analysis.
+```{r}
+data_col <- colnames(data)
+data <- data[data_col[2:length(data_col)]]
+head(data)
+```
+
+## What was the average age?
+```{r}
+mean(data$Age)
+```
+
+## From `sex` column, create new variable `gender` which only have 'male', 'female'?
+```{r}
+gender <- factor(data$Sex, levels=c(0,1), labels=c('female', 'male'))
+```
+
+
+## How many percent of patient who was male were there in the data?
+```{r}
+sum(data$Sex == 1)/length(data$Sex)*100
+```
+
+## How many percent of male patient who suffered heart disease were there in the data? What about female?
+```{r}
+print(sum(data[data$Sex == 1, 'AHD'] == 'Yes')/length(data[data$Sex == 1, 'AHD']))
+print(sum(data[data$Sex == 0, 'AHD'] == 'Yes')/length(data[data$Sex == 0, 'AHD']))
+```
+
+## What was the range of RestBP?
+```{r}
+print(c(min(data$RestBP), max(data$RestBP)))
+```
+
+## What was the distribution of AHD?
+```{r}
+print(table(data$AHD))
+```
+
+## Calculate some basic desciptive statistics
+```{r}
+library(dplyr)
+summary(data)
+```
+
+```{r}
+library(Hmisc)
+describe(data)
+```
+
+## Plot the distribution of AHD?
+```{r}
+barplot(table(data$AHD))
+```
+
+## Plot the distribution of RestBP per Sex?
+```{r}
+# In this plot, the distribution need a Factor variable to split, so we input the `gender`
+# instead of `Sex`
+ggplot(data, aes(x=RestBP)) + geom_histogram(aes(color=gender, fill=gender), alpha=0.2)
+```
+
+
+## Illustrate the relationship between sex and AHD?
+```{r}
+table(data$Sex, data$AHD)
+```
+
+## Illustrate the relationship between MaxHR and AHD?
+```{r}
+boxplot(data$MaxHR ~ data$AHD)
+```
+
+## Illustrate the relationship between Age and MaxHR?
+```{r}
+plot(data$Age, data$MaxHR)
+```
+
+## Illustrate the relationship between the continuous variables and the target?
+```{r}
+pairs(data[c('Age', 'RestBP', 'Chol', 'MaxHR', 'Oldpeak', 'AHD')])
+```
+
+# Hypothesis testing
+
+## Compare the mean RestBP with normal BP (120)?
+```{r}
+t.test(data$RestBP, mu=120)
+```
+
+## Compare mean RestBP by AHD?
+```{r}
+RestBP_Yes = data[data$AHD == "Yes", "RestBP"]
+RestBP_No = data[data$AHD == "No", "RestBP"]
+t.test(RestBP_Yes, RestBP_No)
+```
+
+## Test the independence between AHD and Sex?
+```{r}
+chisq.test(data$Sex, data$AHD)
+```
+
+
+## Compare mean MaxHR by Thal
+### ANOVA
+```{r}
+anova <- aov(MaxHR ~ Thal, data=data)
+summary(anova)
+```
+
+### Pairwise T-Test
+```{r}
+pairwise.t.test(data$MaxHR, data$Thal)
+```
+
+
+### Tukey multiple pairwise-comparisons
+```{r}
+TukeyHSD(anova)
+```
+
+# Linear Regression
+
+## Build a model to predict MaxHR by Age?
+```{r}
+model_1 <- lm(MaxHR ~ Age, data=data)
+summary(model_1)
+```
+
+## Build a model to predict MaxHR by Age & RestBP & Thal?
+```{r}
+model_2 <- lm(MaxHR ~ Age + RestBP + Thal, data=data)
+summary(model_2)
+```
+
