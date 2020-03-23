@@ -1,0 +1,164 @@
+---
+title: "Hồi Quy Tuyến Tính"
+author: "Huy Phung"
+date: "3/20/2020"
+output:
+  word_document: default
+  html_document: default
+  pdf_document: default
+---
+
+### Load thư viện 
+
+```{r}
+library(car)
+library(Hmisc)
+library(psych)
+library(dplyr)
+```
+
+###  Đọc dữ liệu từ file .csv (Heart.csv)
+```{r}
+data = read.csv('https://raw.githubusercontent.com/pnhuy/datasets/master/heart_uci/heart.csv')
+attach(data)
+head(data)
+```
+
+### Tạo một biến Gender tương ứng với biến Sex (0 : Female , 1 : Male )
+```{r}
+Gender = factor(Sex, levels = c(0,1), labels = c('Female','Male'))
+```
+
+# Phân tích tương quan 
+
+### Tương quan một biến 
+```{r}
+plot(MaxHR ~ Age, pch = 16 , col = 'red')
+cor.test(MaxHR, Age)
+```
+```{r}
+cor.test(MaxHR, Age)
+```
+
+### Tương quan đa biến 
+```{r}
+vars = cbind(MaxHR,Age,Chol,RestBP,Oldpeak,Thal)
+corr.test(vars)
+```
+```{r}
+pairs.panels(vars)
+```
+
+# Hồi quy tuyến tính một biến 
+
+## Hồi quy tuyến tính với biến liên tục 
+
+
+```{r}
+res = lm(MaxHR ~ Age)
+summary(res)
+```
+
+
+### Vẽ biểu đồ 
+```{r}
+plot(MaxHR ~ Age, col = 'blue', pch = 16)
+abline(res, col = 2)
+```
+
+### Tính y^
+```{r}
+predict(res)
+```
+
+### Phân tích phương sai 
+```{r}
+aov = anova(res)
+aov 
+```
+
+### Phân tích residual 
+
+### Phân phối chuẩn
+
+- Tính y - y^
+```{r}
+m = resid(res)
+m
+```
+
+- Kiểm định phân phối chuẩn
+```{r}
+hist(m)
+qqnorm(m, pch = 16)
+qqline(m, col = 2, lwd = 3)
+```
+
+```{r}
+shapiro.test(m)
+```
+
+- Trung bình bằng 0
+```{r}
+mean(m)
+```
+
+- Kiểm tra phương sai
+
+```{r}
+ncvTest(res)
+spreadLevelPlot(res, pch = 16)
+```
+
+## Hồi quy tuyến tính với biến phân nhóm 
+```{r}
+res1 = lm(MaxHR ~ Gender)
+summary(res1)
+```
+
+
+```{r}
+boxplot(MaxHR ~ Gender, col = c('red','blue'))
+```
+
+
+
+# Hồi quy tuyến tính đa biến 
+```{r}
+res2 = lm(MaxHR ~ RestBP + Age + Thal)
+summary(res2)
+```
+
+# Ảnh hưởng tương tác 
+
+```{r}
+res3 = lm(MaxHR ~ RestBP + Age + Thal  + Thal:Age)
+summary(res3)
+```
+
+# Xây dựng mô hình thống kê tối ưu 
+
+-  Xử lý dữ liệu 
+
+```{r}
+dt = select(data, c(2:14))
+head(dt)
+```
+
+- Xây dựng mô hình 
+
+```{r}
+model = lm(MaxHR ~ ., data = na.omit(dt))
+```
+
+- Chọn mô hình tối ưu 
+
+```{r}
+op = step(model) 
+op
+```
+
+```{r}
+summary(op)
+```
+
