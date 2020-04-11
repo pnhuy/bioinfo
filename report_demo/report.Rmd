@@ -1,0 +1,115 @@
+---
+title: "Logistic Regression model for AHD"
+author: "Huy N. Pham"
+date: "4/11/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The data table is the result from an cardiovascular (CV) study in Cleveland Clinic between May 1981 and September 1984. No patients had a history of CV disease. After providing the historical information, all patients performed a number of clinical tests. A part of features from these results was collected in the studying data table.
+
+## Data loading
+
+The data table was loaded and assigned to a variable call `data`.
+```{r}
+# Install the required library
+list.of.packages <- c("dplyr", "qwraps2", "ggplot2", "gridExtra", "MASS")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+library(qwraps2)
+options(qwraps2_markup = "markdown")
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(MASS)
+
+# Load the data table
+data_link <- "https://github.com/pnhuy/datasets/raw/master/heart_uci/heart.csv"
+heart <- read.csv(data_link)
+```
+
+## Exploratory Data analysis
+
+The data have `r dim(heart)[1]` rows or patients, and `r dim(heart)[2]` fields: `r colnames(heart)`.
+
+```{r}
+
+# Remove the first column
+data_col <- colnames(heart)
+data_col <- data_col[data_col != "X"]
+heart <- heart[data_col]
+
+# Process the categorical variables
+heart$Sex <- factor(heart$Sex, levels=c(0,1), labels=c('female', 'male'))
+#heart$ChestPain <- factor(heart$ChestPain)
+heart$Fbs <- factor(heart$Fbs)
+heart$RestECG <- factor(heart$RestECG)
+heart$ExAng <- factor(heart$ExAng)
+heart$Slope <- factor(heart$Slope)
+heart$Ca <- factor(heart$Ca)
+heart$Thal <- factor(heart$Thal)
+heart$AHD <- factor(heart$AHD)
+
+factor_feature <- c("Sex", "Fbs", "RestECG", "ExAng", "Slope", "Ca", "Thal")
+numberic_feature <- c("Age", "RestBP", "Chol", "MaxHR", "Oldpeak")
+```
+
+The basic statistics of data was below:
+```{r results="asis"}
+summary_table(heart)
+```
+
+
+The data might contain missing value and they would be removed before building the model.
+
+```{r}
+heart <- na.omit(heart)
+```
+
+After removing the NA, the table consisted of `r dim(heart)[1]` records.
+
+The distibution of target (`AHD`) which was grouped by numerical variables was illustrated by using boxplot.
+```{r}
+p1 <- ggplot(heart, aes(x=AHD, y=Age, color=AHD)) + geom_boxplot() + theme(legend.position = "none") 
+p2 <- ggplot(heart, aes(x=AHD, y=RestBP, color=AHD)) + geom_boxplot() + theme(legend.position = "none") 
+p3 <- ggplot(heart, aes(x=AHD, y=Chol, color=AHD)) + geom_boxplot() + theme(legend.position = "none") 
+p4 <- ggplot(heart, aes(x=AHD, y=MaxHR, color=AHD)) + geom_boxplot() + theme(legend.position = "none") 
+p5 <- ggplot(heart, aes(x=AHD, y=Oldpeak, color=AHD)) + geom_boxplot() + theme(legend.position = "none") 
+grid.arrange(p1, p2, p3, p4, p5)
+```
+
+The boxplot show the difference in distribution of `AHD` by `Age`, `MaxHR` and `Oldpeak`. These hypothesis would be tested by t-test. 
+
+## Hypothesis testing
+
+```{r}
+t.test(Age ~ AHD, data=heart)
+t.test(MaxHR ~ AHD, data=heart)
+t.test(Oldpeak ~ AHD, data=heart)
+```
+
+The `t.test` show there was a significant difference in mean of `Age`, `MaxHR`, `Oldpeak` between group of patiend who had AHD or no AHD.
+
+## Logistic regression model
+
+A logistic model would be built to predict the probability of AHD by the remaining variables. Stepwise algorithm was used to select the best model.
+
+```{r}
+full.model <- glm(AHD ~ ., data=heart, family = "binomial")
+step.model <- stepAIC(full.model, direction = "both", 
+                      trace = FALSE)
+summary(step.model)
+```
+
+
+## Interpret the Model
+
+
+## Conclusion
