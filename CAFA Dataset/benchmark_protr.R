@@ -5,7 +5,7 @@ library(randomForest)
 library(caret) 
 FASTA_FILE <- "./data/training/CAFA3_training_data/uniprot_sprot_exp.fasta"
 LABEL_FILE <- "./data/training/CAFA3_training_data/uniprot_sprot_exp.txt"
-N_SAMPLE = 10000 # Max 66631
+N_SAMPLE = 2000 # Max 66631
 
 # Read FASTA file and label
 fasta <- readFASTA(FASTA_FILE)
@@ -46,13 +46,16 @@ te.idx <- setdiff(1:nrow(fulldf), tr.idx)
 
 x.tr <- feature[tr.idx,]
 x.te <- feature[te.idx,]
-y.tr <- droplevels(target[tr.idx,])
-y.te <- droplevels(target[te.idx,])
+y.tr <- droplevels(target$go[tr.idx])
+y.te <- droplevels(target$go[te.idx])
 
 
 # Random Forest
 rf.fit <- randomForest(x.tr, y.tr, cv.fold = 5)
 y.pred <- predict(rf.fit, newdata = x.te)
+
+# y.pred <- factor(y.pred, levels = levels(target))
+y.te <- factor(y.te, levels = levels(y.pred))
 
 results <- table(y.pred, y.te)
 cm <- confusionMatrix(results)
