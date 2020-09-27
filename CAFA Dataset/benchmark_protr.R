@@ -1,4 +1,5 @@
 # Load required library
+# install.packages("protr")
 library(protr)
 library(dplyr)
 library(randomForest)
@@ -9,7 +10,7 @@ N_SAMPLE = 2000 # Max 66631
 
 # Read FASTA file and label
 fasta <- readFASTA(FASTA_FILE)
-label <- read.delim(txt_file,header = FALSE)
+label <- read.delim(LABEL_FILE,header = FALSE)
 names(label) <- c('id','go','namespace')
 
 # Remove duplicates
@@ -23,7 +24,7 @@ fasta_1 <- fasta[(sapply(fasta, protcheck))]
 length(fasta_1)
 
 # Get features
-x <- as.data.frame(t(sapply(fasta_1, extractAAC))) # Replace feature function
+x <- as.data.frame(t(sapply(fasta_1, extractDC))) # Replace feature function
 x$id <- rownames(x)
 
 # Merge features and labels
