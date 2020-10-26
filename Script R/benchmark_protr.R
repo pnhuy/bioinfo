@@ -4,28 +4,28 @@ library(protr)
 library(dplyr)
 library(randomForest)
 library(caret) 
-FASTA_FILE <- "./data/training/CAFA3_training_data/uniprot_sprot_exp.fasta"
-LABEL_FILE <- "./data/training/CAFA3_training_data/uniprot_sprot_exp.txt"
-N_SAMPLE = 2000 # Max 66631
+FASTA_FILE <- "/Users/phungduchuy/BIOINFO/Project/CAFA/CAFA3_training_data/uniprot_sprot_exp.fasta"
+LABEL_FILE <- "/Users/phungduchuy/BIOINFO/Project/CAFA/CAFA3_training_data/uniprot_sprot_exp.txt"
+N_SAMPLE = 500 # Max 66631
 
 # Read FASTA file and label
 fasta <- readFASTA(FASTA_FILE)
 label <- read.delim(LABEL_FILE,header = FALSE)
 names(label) <- c('id','go','namespace')
 
-# Remove duplicates
-label_1 <- distinct(label, id, .keep_all=TRUE)
+# Remove duplicated
+label_1 <- distinct(label, id,.keep_all = TRUE) #Is this necessary ?
 
 # Length of data
-length(fasta)
+length(fasta) # 66841
 
 # Check the protein sequence and remove the non-standard sequences:
 fasta_1 <- fasta[(sapply(fasta, protcheck))]
-length(fasta_1)
+length(fasta_1) # 66631
 
 # Get features
-x <- as.data.frame(t(sapply(fasta_1, extractDC))) # Replace feature function
-x$id <- rownames(x)
+x <- as.data.frame(t(sapply(fasta_1, extractDC))) # Replace feature function, t : transpose matrix, row: id, columns: based on extraction method
+x$id <- rownames(x) #add column ID
 
 # Merge features and labels
 fulldf <- merge(x=x, y=label_1, by='id')
@@ -61,3 +61,4 @@ y.te <- factor(y.te, levels = levels(y.pred))
 results <- table(y.pred, y.te)
 cm <- confusionMatrix(results)
 print(cm$overall)
+
